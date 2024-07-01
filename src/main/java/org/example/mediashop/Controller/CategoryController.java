@@ -30,7 +30,7 @@ public class CategoryController {
         return categoryService.getCategoryById(id);
     }
 
-    @GetMapping(value = "/id")
+    @GetMapping(value = "/title")
     public ResponseEntity<?> getCategoryByTitle(@RequestParam(value = "title") final String title) {
         return categoryService.getCategoryByTitle(title);
     }

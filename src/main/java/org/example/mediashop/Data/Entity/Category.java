@@ -21,6 +21,7 @@ public class Category {
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
+    @JsonIgnore
     private List<Category> subcategories;
 
     @Column(name="title", nullable = false)
