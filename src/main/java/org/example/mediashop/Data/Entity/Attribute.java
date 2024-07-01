@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "attribute", schema = "public")
 @Getter
@@ -20,7 +22,6 @@ public class Attribute {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL)
+    private List<ProductAttribute> products;
 }

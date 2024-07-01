@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,5 +42,6 @@ public class Category {
     private String slug;
 
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private List<ProductCategory> products;
 }

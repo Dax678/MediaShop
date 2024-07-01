@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,12 +32,21 @@ public class Product {
     @Column(name = "image", nullable = false)
     private String image;
 
-    @Column(name = "unitPrice", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private Double unitPrice;
 
-    @Column(name = "quantityPerUnit", nullable = false)
+    @Column(name = "quantity_per_unit", nullable = false)
     private Integer quantityPerUnit;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ProductCategory> categories;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ProductAttribute> attributes;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<OrderItem> orders;
 }

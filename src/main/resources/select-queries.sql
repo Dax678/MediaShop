@@ -1,24 +1,40 @@
-SELECT *
-FROM category cat
-         JOIN attribute at
-              ON cat.id = at.category_id;
+SELECT DISTINCT pr.name, pr.description, ca.title, pr.unit_price
+FROM category ca
+         JOIN product_category pc
+              ON ca.id = pc.category_id
+         JOIN product pr
+              ON pc.product_id = pr.id;
 
 SELECT pr.name, ca.title, pr.description, at.name, pa.value
 FROM category ca
-         JOIN attribute at
-              ON ca.id = at.category_id
-         JOIN product_attribute pa
-              ON at.id = pa.attribute_id
+         JOIN product_category pc
+              ON ca.id = pc.category_id
          JOIN product pr
-              ON pa.product_id = pr.id
-WHERE at.name = 'Battery Life' AND pa.value = '10 hours';
+              ON pc.product_id = pr.id
+         JOIN product_attribute pa
+              ON pr.id = pa.product_id
+         JOIN attribute at
+              ON pa.attribute_id = at.id
+WHERE at.name = 'Battery Life'
+  AND pa.value = '10 hours';
 
-SELECT pr.name, at.name, pa.value
-FROM category ca
-         JOIN attribute at
-              ON ca.id = at.category_id
-         JOIN product_attribute pa
-              ON at.id = pa.attribute_id
-         JOIN product pr
-              ON pa.product_id = pr.id
-WHERE pr.name = 'Smartwatch JKL';
+SELECT us.username, ord.id, STRING_AGG(oi.product_id::TEXT, ',') AS product_ids
+FROM public.user us
+         JOIN public.order ord
+              ON us.id = ord.user_id
+         JOIN public.order_item oi
+              ON ord.id = oi.order_id
+        JOIN public.product pr
+              ON oi.product_id = pr.id
+GROUP BY
+    us.username, ord.id;
+
+SELECT ord.id, us.username, SUM(pr.unit_price)
+FROM public.user us
+         JOIN public.order ord
+              ON us.id = ord.user_id
+         JOIN public.order_item oi
+              ON ord.id = oi.order_id
+         JOIN public.product pr
+              ON oi.product_id = pr.id
+GROUP BY ord.id, us.username

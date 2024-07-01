@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,11 +17,12 @@ public class ProductCategory {
     @ManyToOne
     @MapsId(value = "productId")
     @JoinColumn(name = "product_id")
-    Product product;
-
+    @JsonIgnore
+    private Product product;
 
     @ManyToOne
     @MapsId(value = "categoryId")
     @JoinColumn(name = "category_id")
-    Category category;
+    @JsonIgnore
+    private Category category;
 }
