@@ -1,12 +1,11 @@
 package org.example.mediashop.Service;
 
 import lombok.AllArgsConstructor;
+import org.example.mediashop.Configuration.Exception.CategoryNotFoundException;
 import org.example.mediashop.Data.Entity.Category;
 import org.example.mediashop.Repository.CategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,37 +18,34 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public ResponseEntity<?> getAllCategories() {
+    public List<Category> getAllCategories() {
         List<Category> category = categoryRepository.findAll();
 
-        if(!category.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(category);
-        } else {
+        if(category.isEmpty()) {
             logger.error("Categories not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Categories not found");
+            throw new CategoryNotFoundException();
         }
+        return category;
     }
 
-    public ResponseEntity<?> getCategoryById(final Long id) {
+    public Category getCategoryById(final Long id) {
             Optional<Category> category = categoryRepository.findCategoryById(id);
 
-            if(category.isPresent()) {
-                return ResponseEntity.status(HttpStatus.OK).body(category.get());
-            } else {
+            if(category.isEmpty()) {
                 logger.warn("Category with id: {} not found", id);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with id: " + id + " not found");
+                throw new CategoryNotFoundException(id);
             }
+            return category.get();
     }
 
-    public ResponseEntity<?> getCategoryByTitle(final String title) {
+    public Category getCategoryByTitle(final String title) {
         Optional<Category> category = categoryRepository.findCategoryByTitle(title);
 
-        if(category.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(category.get());
-        } else {
-            logger.warn("Category with id: {} not found", title);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with id: " + title + " not found");
+        if(category.isEmpty()) {
+            logger.warn("Category with title: {} not found", title);
+            throw new CategoryNotFoundException(title);
         }
+        return category.get();
     }
 
 }

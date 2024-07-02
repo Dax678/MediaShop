@@ -1,6 +1,7 @@
 package org.example.mediashop.Service;
 
 import lombok.AllArgsConstructor;
+import org.example.mediashop.Configuration.Exception.ProductNotFoundException;
 import org.example.mediashop.Data.Entity.Product;
 import org.example.mediashop.Repository.ProductRepository;
 import org.slf4j.Logger;
@@ -18,25 +19,29 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public ResponseEntity<?> getProductById(final Long id) {
+    public Product getProductById(final Long id) {
         Optional<Product> product = productRepository.findProductById(id);
 
-        if(product.isPresent())
-            return ResponseEntity.status(HttpStatus.OK).body(product.get());
-        else {
+        if (product.isEmpty()) {
             logger.warn("Product with id: {} not found", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with id: " + id + " not found");
+            throw new ProductNotFoundException(id);
         }
+        return product.get();
     }
 
-    public ResponseEntity<?> getProductByName(final String name) {
+    public Product getProductByName(final String name) {
         Optional<Product> product = productRepository.findProductByName(name);
 
-        if(product.isPresent())
-            return ResponseEntity.status(HttpStatus.OK).body(product.get());
-        else {
+        if (product.isEmpty()) {
             logger.warn("Product with name: {} not found", name);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with name: " + name + " not found");
+            throw new ProductNotFoundException(name);
         }
+
+        return product.get();
+    }
+
+    public ResponseEntity<?> addProduct(final Product product) {
+        Product createdProduct = productRepository.save(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 }
