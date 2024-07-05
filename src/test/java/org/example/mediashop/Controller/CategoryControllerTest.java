@@ -1,112 +1,177 @@
 package org.example.mediashop.Controller;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.example.mediashop.Data.Entity.Category;
-import org.example.mediashop.Service.CategoryService;
+import org.example.mediashop.Repository.CategoryRepository;
+import org.example.mediashop.TestConfig.IntegrationTest;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
+class CategoryControllerTest extends IntegrationTest {
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(CategoryController.class)
-class CategoryControllerTest {
+    @LocalServerPort
+    private Integer port;
 
-    @MockBean
-    private CategoryService categoryService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-    private CategoryController categoryController;
+    @BeforeAll
+    static void beforeAll() {
+        postgres.start();
+    }
 
-    @Captor
-    private ArgumentCaptor<Long> idCaptor;
-
-    List<Category> expectedCategory = new ArrayList<>();
+    @AfterAll
+    static void afterAll() {
+        postgres.stop();
+    }
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
+        RestAssured.baseURI = "http://localhost:" + port;
+        categoryRepository.deleteAll();
+    }
 
-        categoryController = new CategoryController(categoryService);
+    @Test
+    void shouldGetAllCategories() {
+        categoryRepository.saveAll(List.of(
+                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null),
+                new Category(null, "CategoryTitle2", "CategoryDescription2", "MetaTitle2", "MetaDescription2", "new, category", "new-category-2", null, null, null),
+                new Category(null, "CategoryTitle3", "CategoryDescription3", "MetaTitle3", "MetaDescription3", "new, category", "new-category-3", null, null, null)
+        ));
 
-        expectedCategory = Arrays.asList(
-                new Category(1L, null, null, "New Category 1", "Description for new category 1", "Meta title 1", "Meta description 1", "new, category", "new-category-1", null),
-                new Category(2L, null, null, "New Category 2", "Description for new category 2", "Meta title 2", "Meta description 2", "new, category", "new-category-2", null),
-                new Category(3L, null, null, "New Category 3", "Description for new category 3", "Meta title 3", "Meta description 3", "new, category", "new-category-3", null)
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories")
+                .then()
+                .statusCode(200)
+                .body("category.", hasSize(3));
+    }
+
+    @Test
+    void shouldReturn404WhenCategoryNotFound() {
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories")
+                .then()
+                .statusCode(404)
+                .body("message", is("Categories not found"))
+                .body("statusCode", is(404));
+    }
+
+    @Test
+    void shouldGetCategoryById() {
+        Category category = categoryRepository.save(
+                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null)
         );
-    }
 
-    @Test
-    void testGetAllCategories_returnsCategoriesList() {
-        // When
-        when(categoryService.getAllCategories()).thenReturn(expectedCategory);
-        ResponseEntity<Map<String, List<Category>>> responseEntity = categoryController.getAllCategories();
-
-        // Then
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-        List<Category> result = responseEntity.getBody().get("category");
-
-        assertEquals(expectedCategory, result);
-    }
-
-    @Test
-    public void testGetCategoryById_whenCategoryExists_returnsCategory() {
         // Given
-        Long categoryId = 1L;
-        when(categoryService.getCategoryById(anyLong())).thenReturn(expectedCategory.getFirst());
-
-        // When
-        ResponseEntity<Map<String, Category>> responseEntity = categoryController.getCategoryById(categoryId);
-
-        // Then
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-        Map<String, Category> responseBody = responseEntity.getBody();
-
-        assertNotNull(responseBody);
-        assertEquals(expectedCategory.getFirst(), responseBody.get("category"));
-
-        verify(categoryService).getCategoryById(idCaptor.capture());
-        assertEquals(categoryId, idCaptor.getValue());
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/id/{0}", category.getId().intValue())
+                .then()
+                .statusCode(200)
+                .body("category.id", is(category.getId().intValue()))
+                .body("category.title", is("CategoryTitle"))
+                .body("category.description", is("CategoryDescription"))
+                .body("category.metaTitle", is("MetaTitle"))
+                .body("category.metaDescription", is("MetaDescription"))
+                .body("category.metaKeywords", is("new, category"))
+                .body("category.slug", is("new-category-1"));
     }
 
     @Test
-    void testGetCategoryByTitle_whenCategoryExists_returnsCategory() {
+    void shouldReturn400WhenCategoryIdIsInvalid() {
+        long categoryId = 0L;
+
         // Given
-        String categoryTitle = "New Category 2";
-        when(categoryService.getCategoryByTitle(anyString())).thenReturn(expectedCategory.getFirst());
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/id/{0}", categoryId)
+                .then()
+                .statusCode(400)
+                .body("message", is("Validation error: getCategoryById.id: must be greater than " + categoryId))
+                .body("statusCode", is(400));
+    }
 
-        // When
-        ResponseEntity<Map<String, Category>> responseEntity = categoryController.getCategoryByTitle(categoryTitle);
+    @Test
+    void shouldReturn404WhenCategoryIdNotFound() {
+        long categoryId = 10L;
 
-        // Then
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/id/{0}", categoryId)
+                .then()
+                .statusCode(404)
+                .body("message", is("Category with id: " + categoryId + " not found"))
+                .body("statusCode", is(404));
+    }
 
-        Map<String, Category> responseBody = responseEntity.getBody();
+    @Test
+    void shouldGetCategoryByTitle() {
+        Category category = categoryRepository.save(
+                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null)
+        );
 
-        assertNotNull(responseBody);
-        assertEquals(expectedCategory.getFirst(), responseBody.get("category"));
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/title/CategoryTitle")
+                .then()
+                .statusCode(200)
+                .body("category.id", is(category.getId().intValue()))
+                .body("category.title", is("CategoryTitle"))
+                .body("category.description", is("CategoryDescription"))
+                .body("category.metaTitle", is("MetaTitle"))
+                .body("category.metaDescription", is("MetaDescription"))
+                .body("category.metaKeywords", is("new, category"))
+                .body("category.slug", is("new-category-1"));
+    }
+
+    @Test
+    void shouldReturn400WhenCategoryTitleIsBlank() {
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/title/{0}", " ")
+                .then()
+                .statusCode(400)
+                .body("message", is("Validation error: getCategoryByTitle.title: must not be blank"))
+                .body("statusCode", is(400));
+    }
+
+    @Test
+    void shouldReturn404WhenCategoryTitleNotFound() {
+        String categoryName = "Lorem Ipsum";
+
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/categories/title/{0}", categoryName)
+                .then()
+                .statusCode(404)
+                .body("message", is("Category with title: " + categoryName + " not found"))
+                .body("statusCode", is(404));
     }
 }

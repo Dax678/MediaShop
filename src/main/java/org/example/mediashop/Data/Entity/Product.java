@@ -50,4 +50,17 @@ public class Product {
     @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<OrderItem> orders;
+
+    public Product(String name, String description, String shortDescription, String brand, String image, Double unitPrice, Integer quantityPerUnit, List<ProductCategory> categories, List<ProductAttribute> attributes, List<OrderItem> orders) {
+        this.name = name;
+        this.description = description;
+        this.shortDescription = shortDescription;
+        this.brand = brand;
+        this.image = image;
+        this.unitPrice = unitPrice;
+        this.quantityPerUnit = quantityPerUnit;
+        this.categories = categories;
+        this.attributes = attributes;
+        this.orders = orders;
+    }
 }

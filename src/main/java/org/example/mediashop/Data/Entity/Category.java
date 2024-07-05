@@ -51,4 +51,17 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<ProductCategory> products;
+
+    public Category(Long parent_id, String title, String description, String metaTitle, String metaDescription, String metaKeywords, String slug, Category parent, List<Category> subcategories, List<ProductCategory> products) {
+        this.parent_id = parent_id;
+        this.title = title;
+        this.description = description;
+        this.metaTitle = metaTitle;
+        this.metaDescription = metaDescription;
+        this.metaKeywords = metaKeywords;
+        this.slug = slug;
+        this.parent = parent;
+        this.subcategories = subcategories;
+        this.products = products;
+    }
 }

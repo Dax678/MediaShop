@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public.user_details
     phone_number VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE public.user
+CREATE TABLE IF NOT EXISTS public.user
 (
     id              SERIAL PRIMARY KEY,
     username        VARCHAR(255) NOT NULL UNIQUE,
