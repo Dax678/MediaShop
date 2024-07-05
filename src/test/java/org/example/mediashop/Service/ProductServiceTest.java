@@ -1,6 +1,6 @@
 package org.example.mediashop.Service;
 
-import org.example.mediashop.Configuration.Exception.ProductNotFoundException;
+import org.example.mediashop.Configuration.Exception.NotFoundException;
 import org.example.mediashop.Data.Entity.Product;
 import org.example.mediashop.Repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,8 +33,8 @@ class ProductServiceTest {
     static final String EXPECTED_PRODUCT_NAME = "Smartphone X";
     static final String NONEXISTENT_PRODUCT_NAME = "Nonexistent Product";
     static final long EXPECTED_PRODUCT_ID = 1L;
-    static final String EXPECTED_PRODUCT_ID_EXCEPTION_MESSAGE = "Product with id " + EXPECTED_PRODUCT_ID + " not found";
-    static final String EXPECTED_PRODUCT_NAME_EXCEPTION_MESSAGE = "Product with name " + NONEXISTENT_PRODUCT_NAME + " not found";
+    static final String EXPECTED_PRODUCT_ID_EXCEPTION_MESSAGE = "Product with id: " + EXPECTED_PRODUCT_ID + " not found";
+    static final String EXPECTED_PRODUCT_NAME_EXCEPTION_MESSAGE = "Product with name: " + NONEXISTENT_PRODUCT_NAME + " not found";
 
 
     @BeforeEach
@@ -67,7 +67,7 @@ class ProductServiceTest {
         Mockito.when(productRepository.findProductById(anyLong())).thenReturn(Optional.empty());
 
         // When
-        ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> productService.getProductById(EXPECTED_PRODUCT_ID));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.getProductById(EXPECTED_PRODUCT_ID));
 
         // Then
         assertEquals(exception.getMessage(), EXPECTED_PRODUCT_ID_EXCEPTION_MESSAGE);
@@ -92,7 +92,7 @@ class ProductServiceTest {
         Mockito.when(productRepository.findProductByName(anyString())).thenReturn(Optional.empty());
 
         // When
-        ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> productService.getProductByName(NONEXISTENT_PRODUCT_NAME));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.getProductByName(NONEXISTENT_PRODUCT_NAME));
 
         // Then
         assertEquals(exception.getMessage(), EXPECTED_PRODUCT_NAME_EXCEPTION_MESSAGE);

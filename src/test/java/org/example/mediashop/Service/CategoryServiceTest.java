@@ -1,6 +1,6 @@
 package org.example.mediashop.Service;
 
-import org.example.mediashop.Configuration.Exception.CategoryNotFoundException;
+import org.example.mediashop.Configuration.Exception.NotFoundException;
 import org.example.mediashop.Data.Entity.Category;
 import org.example.mediashop.Repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +11,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -34,8 +33,8 @@ class CategoryServiceTest {
     static final String NONEXISTENT_CATEGORY_TITLE = "Nonexistent Category title";
     static final long CATEGORY_ID = 1L;
     static final String CATEGORY_EXCEPTION_MESSAGE = "Categories not found";
-    static final String CATEGORY_ID_EXCEPTION_MESSAGE = "Category with id " + CATEGORY_ID + " not found";
-    static final String CATEGORY_TITLE_EXCEPTION_MESSAGE = "Category with title " + NONEXISTENT_CATEGORY_TITLE + " not found";
+    static final String CATEGORY_ID_EXCEPTION_MESSAGE = "Category with id: " + CATEGORY_ID + " not found";
+    static final String CATEGORY_TITLE_EXCEPTION_MESSAGE = "Category with title: " + NONEXISTENT_CATEGORY_TITLE + " not found";
 
     @BeforeEach
     public void setUp() {
@@ -43,9 +42,9 @@ class CategoryServiceTest {
         Mockito.reset(categoryRepository);
 
         expectedCategory = Arrays.asList(
-                new Category(1L, null, null, "New Category 1", "Description for new category 1", "Meta title 1", "Meta description 1", "new, category", "new-category-1", null),
-                new Category(2L, null, null, "New Category 2", "Description for new category 2", "Meta title 2", "Meta description 2", "new, category", "new-category-2", null),
-                new Category(3L, null, null, "New Category 3", "Description for new category 3", "Meta title 3", "Meta description 3", "new, category", "new-category-3", null)
+                new Category(1L, null, "New Category 1", "Description for new category 1", "Meta title 1", "Meta description 1", "new, category", "new-category-1", null, null, null),
+                new Category(2L, null, "New Category 2", "Description for new category 2", "Meta title 2", "Meta description 2", "new, category", "new-category-2", null, null, null),
+                new Category(3L, null, "New Category 3", "Description for new category 3", "Meta title 3", "Meta description 3", "new, category", "new-category-3", null, null, null)
         );
     }
 
@@ -69,7 +68,7 @@ class CategoryServiceTest {
         when(categoryRepository.findAll()).thenReturn(emptyCategoryList);
 
         // When
-        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> categoryService.getAllCategories());
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> categoryService.getAllCategories());
         String actualMessage = exception.getMessage();
 
         // Then
@@ -95,7 +94,7 @@ class CategoryServiceTest {
         when(categoryRepository.findCategoryById(anyLong())).thenReturn(Optional.empty());
 
         // When
-        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> categoryService.getCategoryById(CATEGORY_ID));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> categoryService.getCategoryById(CATEGORY_ID));
 
         // Then
         assertEquals(exception.getMessage(), CATEGORY_ID_EXCEPTION_MESSAGE);
@@ -120,7 +119,7 @@ class CategoryServiceTest {
         when(categoryRepository.findCategoryByTitle(anyString())).thenReturn(Optional.empty());
 
         // When
-        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> categoryService.getCategoryByTitle(NONEXISTENT_CATEGORY_TITLE));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> categoryService.getCategoryByTitle(NONEXISTENT_CATEGORY_TITLE));
 
         // Then
         assertEquals(exception.getMessage(), CATEGORY_TITLE_EXCEPTION_MESSAGE);

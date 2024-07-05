@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,11 @@ public class OrderItem {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     @Column(name = "price", nullable = false)
     private double price;
@@ -41,4 +40,16 @@ public class OrderItem {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDate updatedAt;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @JsonIgnore
+    private Order order;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @JsonIgnore
+    private Product product;
 }

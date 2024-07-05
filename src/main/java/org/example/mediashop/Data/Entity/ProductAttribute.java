@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +17,25 @@ public class ProductAttribute {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
-    @ManyToOne
-    @JoinColumn(name = "attribute_id")
-    private Attribute attribute;
+    @Column(name = "attribute_id", nullable = false)
+    private Long attributeId;
 
     // Attribute value example: red, Intel
     @Column(name = "value", nullable = false)
     private String value;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @JsonIgnore
+    private Product product;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "attribute_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @JsonIgnore
+    private Attribute attribute;
 }

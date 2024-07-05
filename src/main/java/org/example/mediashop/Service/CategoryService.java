@@ -1,7 +1,7 @@
 package org.example.mediashop.Service;
 
 import lombok.AllArgsConstructor;
-import org.example.mediashop.Configuration.Exception.CategoryNotFoundException;
+import org.example.mediashop.Configuration.Exception.NotFoundException;
 import org.example.mediashop.Data.Entity.Category;
 import org.example.mediashop.Repository.CategoryRepository;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class CategoryService {
 
         if(category.isEmpty()) {
             logger.error("Categories not found");
-            throw new CategoryNotFoundException();
+            throw new NotFoundException("Categories not found");
         }
         return category;
     }
@@ -33,7 +33,7 @@ public class CategoryService {
 
             if(category.isEmpty()) {
                 logger.warn("Category with id: {} not found", id);
-                throw new CategoryNotFoundException(id);
+                throw new NotFoundException("Category with id: {0} not found", id);
             }
             return category.get();
     }
@@ -43,7 +43,7 @@ public class CategoryService {
 
         if(category.isEmpty()) {
             logger.warn("Category with title: {} not found", title);
-            throw new CategoryNotFoundException(title);
+            throw new NotFoundException("Category with title: {0} not found", title);
         }
         return category.get();
     }

@@ -20,11 +20,10 @@ public class Order {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
     @JsonIgnore
     private List<OrderItem> products;
 
@@ -32,10 +31,12 @@ public class Order {
     private Double totalAmount;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     @Column(name = "payment_status", nullable = false)
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private OrderPaymentStatus paymentStatus;
 
     @Column(name = "payment_method", nullable = false)
     private String paymentMethod;
@@ -51,4 +52,10 @@ public class Order {
 
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @JsonIgnore
+    private User user;
 }

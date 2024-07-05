@@ -1,5 +1,8 @@
 package org.example.mediashop.Controller;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.example.mediashop.Data.Entity.Category;
 import org.example.mediashop.Service.CategoryService;
@@ -25,20 +28,39 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    /**
+     * This method retrieves all categories from the database.
+     *
+     * @return ResponseEntity containing a map with a key "category" and a list of Category objects as its value.
+     */
     @GetMapping
     public ResponseEntity<Map<String, List<Category>>> getAllCategories() {
         List<Category> category = categoryService.getAllCategories();
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
     }
 
+    /**
+     * This method retrieves a category from the database based on its unique identifier.
+     *
+     * @param id The unique identifier of the category to retrieve.
+     * @return ResponseEntity containing a map with a key "category" and a Category object as its value.
+     * @throws ConstraintViolationException If the provided id is not a positive number.
+     */
     @GetMapping(value = "/id/{id}")
-    public ResponseEntity<Map<String, Category>> getCategoryById(@PathVariable(value = "id") final Long id) {
+    public ResponseEntity<Map<String, Category>> getCategoryById(@PathVariable(value = "id") @Positive final Long id) {
         Category category = categoryService.getCategoryById(id);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
     }
 
+    /**
+     * This method retrieves a category from the database based on its title.
+     *
+     * @param title The title of the category to retrieve.
+     * @return ResponseEntity containing a map with a key "category" and a Category object as its value.
+     * @throws ConstraintViolationException If the provided title is not a non-empty string.
+     */
     @GetMapping(value = "/title/{title}")
-    public ResponseEntity<Map<String, Category>> getCategoryByTitle(@PathVariable(value = "title") final String title) {
+    public ResponseEntity<Map<String, Category>> getCategoryByTitle(@PathVariable(value = "title") @NotBlank final String title) {
         Category category = categoryService.getCategoryByTitle(title);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));

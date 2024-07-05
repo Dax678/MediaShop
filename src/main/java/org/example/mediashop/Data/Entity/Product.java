@@ -39,15 +39,15 @@ public class Product {
     @Column(name = "quantity_per_unit", nullable = false)
     private Integer quantityPerUnit;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<ProductCategory> categories;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<ProductAttribute> attributes;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<OrderItem> orders;
 }

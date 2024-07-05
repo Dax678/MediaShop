@@ -14,15 +14,17 @@ public class ProductCategory {
     @EmbeddedId
     private ProductCategoryKey id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapsId(value = "productId")
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @JsonIgnore
     private Product product;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapsId(value = "categoryId")
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @JsonIgnore
     private Category category;
 }

@@ -1,7 +1,7 @@
 package org.example.mediashop.Service;
 
 import lombok.AllArgsConstructor;
-import org.example.mediashop.Configuration.Exception.ProductNotFoundException;
+import org.example.mediashop.Configuration.Exception.NotFoundException;
 import org.example.mediashop.Data.Entity.Product;
 import org.example.mediashop.Repository.ProductRepository;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class ProductService {
 
         if (product.isEmpty()) {
             logger.warn("Product with id: {} not found", id);
-            throw new ProductNotFoundException(id);
+            throw new NotFoundException("Product with id: {0} not found", id);
         }
         return product.get();
     }
@@ -34,7 +34,7 @@ public class ProductService {
 
         if (product.isEmpty()) {
             logger.warn("Product with name: {} not found", name);
-            throw new ProductNotFoundException(name);
+            throw new NotFoundException("Product with name: {0} not found", name);
         }
 
         return product.get();

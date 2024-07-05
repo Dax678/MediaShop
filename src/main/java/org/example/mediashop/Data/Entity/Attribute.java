@@ -1,5 +1,6 @@
 package org.example.mediashop.Data.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class Attribute {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "attribute")
+    @JsonIgnore
     private List<ProductAttribute> products;
 }
