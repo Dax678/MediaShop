@@ -61,7 +61,7 @@ class CategoryControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenCategoryNotFound() {
+    void getAllCategories_shouldReturn404_whenCategoryNotFound() {
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -87,16 +87,16 @@ class CategoryControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(200)
                 .body("category.id", is(category.getId().intValue()))
-                .body("category.title", is("CategoryTitle"))
-                .body("category.description", is("CategoryDescription"))
-                .body("category.metaTitle", is("MetaTitle"))
-                .body("category.metaDescription", is("MetaDescription"))
-                .body("category.metaKeywords", is("new, category"))
-                .body("category.slug", is("new-category-1"));
+                .body("category.title", is(category.getTitle()))
+                .body("category.description", is(category.getDescription()))
+                .body("category.metaTitle", is(category.getMetaTitle()))
+                .body("category.metaDescription", is(category.getMetaDescription()))
+                .body("category.metaKeywords", is(category.getMetaKeywords()))
+                .body("category.slug", is(category.getSlug()));
     }
 
     @Test
-    void shouldReturn400WhenCategoryIdIsInvalid() {
+    void getCategoryById_shouldReturn400_whenCategoryIdIsInvalid() {
         long categoryId = 0L;
 
         // Given
@@ -111,7 +111,7 @@ class CategoryControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenCategoryIdNotFound() {
+    void getCategoryById_shouldReturn404_whenCategoryIdNotFound() {
         long categoryId = 10L;
 
         // Given
@@ -139,16 +139,16 @@ class CategoryControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(200)
                 .body("category.id", is(category.getId().intValue()))
-                .body("category.title", is("CategoryTitle"))
-                .body("category.description", is("CategoryDescription"))
-                .body("category.metaTitle", is("MetaTitle"))
-                .body("category.metaDescription", is("MetaDescription"))
-                .body("category.metaKeywords", is("new, category"))
-                .body("category.slug", is("new-category-1"));
+                .body("category.title", is(category.getTitle()))
+                .body("category.description", is(category.getDescription()))
+                .body("category.metaTitle", is(category.getMetaTitle()))
+                .body("category.metaDescription", is(category.getMetaDescription()))
+                .body("category.metaKeywords", is(category.getMetaKeywords()))
+                .body("category.slug", is(category.getSlug()));
     }
 
     @Test
-    void shouldReturn400WhenCategoryTitleIsBlank() {
+    void getCategoryByTitle_shouldReturn400_whenCategoryTitleIsBlank() {
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -161,7 +161,7 @@ class CategoryControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenCategoryTitleNotFound() {
+    void getCategoryByTitle_shouldReturn404_whenCategoryTitleNotFound() {
         String categoryName = "Lorem Ipsum";
 
         // Given

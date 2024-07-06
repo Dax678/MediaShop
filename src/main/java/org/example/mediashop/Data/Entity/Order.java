@@ -2,6 +2,7 @@ package org.example.mediashop.Data.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,4 +60,16 @@ public class Order {
             insertable = false, updatable = false)
     @JsonIgnore
     private User user;
+
+    public Order(Long userId, Double totalAmount, OrderStatus status, OrderPaymentStatus paymentStatus, String paymentMethod, String shippingAddress, String shippingMethod, LocalDate orderDate, LocalDate deliveryDate) {
+        this.userId = userId;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.paymentStatus = paymentStatus;
+        this.paymentMethod = paymentMethod;
+        this.shippingAddress = shippingAddress;
+        this.shippingMethod = shippingMethod;
+        this.orderDate = orderDate;
+        this.deliveryDate = deliveryDate;
+    }
 }

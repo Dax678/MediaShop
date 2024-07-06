@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,19 +53,22 @@ public class OrderService {
         return order;
     }
 
-    public int updateOrderStatusById(Long id, String status) {
-        if(!orderRepository.existsById(id)) {
+    public Order updateOrderStatusById(Long id, String status) {
+        Optional<Order> order = orderRepository.findOrderById(id);
+
+        if (order.isEmpty()) {
             logger.warn("Order with id: {} not found", id);
             throw new NotFoundException("Order with id: {0} not found", id);
         }
 
-        int rowsAffected = orderRepository.updateOrderStatusById(OrderStatus.valueOf(status), id);
+        order.get().setStatus(OrderStatus.valueOf(status));
+        Order updatedOrder = orderRepository.save(order.get());
 
-        if (rowsAffected == 0) {
-            logger.error("Failed to update order status with id: {} to {}", id, status);
-            throw new NotModifiedException(MessageFormat.format("Failed to update order status with id: {0} to {1}", id, status));
+        if (!updatedOrder.getStatus().equals(OrderStatus.valueOf(status))) {
+            logger.error("Failed to update order status with id: {} to {}. Order has not been updated.", id, status);
+            throw new NotModifiedException("Failed to update order status with id: {0} to {1}", id, status);
         }
 
-        return rowsAffected;
+        return updatedOrder;
     }
 }

@@ -53,17 +53,17 @@ class ProductControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(200)
                 .body("product.id", is(product.getId().intValue()))
-                .body("product.name", is("ProductName1"))
-                .body("product.description", is("Lorem ipsum dolor sit amet, consectetur adipiscing elit."))
-                .body("product.shortDescription", is("ShortDescription"))
-                .body("product.brand", is("BrandName"))
-                .body("product.image", is("image1.jpg"))
-                .body("product.unitPrice", is(100.0F))
-                .body("product.quantityPerUnit", is(10));
+                .body("product.name", is(product.getName()))
+                .body("product.description", is(product.getDescription()))
+                .body("product.shortDescription", is(product.getShortDescription()))
+                .body("product.brand", is(product.getBrand()))
+                .body("product.image", is(product.getImage()))
+                .body("product.unitPrice", is(product.getUnitPrice().floatValue()))
+                .body("product.quantityPerUnit", is(product.getQuantityPerUnit()));
     }
 
     @Test
-    void shouldReturn400WhenProductIdIsInvalid() {
+    void getProductById_shouldReturn400_whenProductIdIsInvalid() {
         long productId = 0L;
 
         // Given
@@ -78,7 +78,7 @@ class ProductControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenProductIdNotFound() {
+    void getProductById_shouldReturn404_whenProductIdNotFound() {
         long productId = 10L;
 
         // Given
@@ -106,17 +106,17 @@ class ProductControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(200)
                 .body("product.id", is(product.getId().intValue()))
-                .body("product.name", is("ProductName2"))
-                .body("product.description", is("Lorem ipsum dolor sit amet, consectetur adipiscing elit."))
-                .body("product.shortDescription", is("ShortDescription"))
-                .body("product.brand", is("BrandName"))
-                .body("product.image", is("image1.jpg"))
-                .body("product.unitPrice", is(100.0F))
-                .body("product.quantityPerUnit", is(10));
+                .body("product.name", is(product.getName()))
+                .body("product.description", is(product.getDescription()))
+                .body("product.shortDescription", is(product.getShortDescription()))
+                .body("product.brand", is(product.getBrand()))
+                .body("product.image", is(product.getImage()))
+                .body("product.unitPrice", is(product.getUnitPrice().floatValue()))
+                .body("product.quantityPerUnit", is(product.getQuantityPerUnit()));
     }
 
     @Test
-    void shouldReturn400WhenProductNameIsBlank() {
+    void getProductByName_shouldReturn400_whenProductNameIsBlank() {
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -129,7 +129,7 @@ class ProductControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenProductNameNotFound() {
+    void getProductByName_shouldReturn404_whenProductNameNotFound() {
         String productName = "Lorem Ipsum";
 
         // Given
