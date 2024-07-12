@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -29,7 +29,7 @@ public class Order {
     @JsonIgnore
     private List<OrderItem> products;
 
-    @Column(name = "total_amount", nullable = false)
+    @Column(name = "total_amount")
     private Double totalAmount;
 
     @Column(name = "status", nullable = false)
@@ -50,10 +50,10 @@ public class Order {
     private String shippingMethod;
 
     @Column(name = "order_date", nullable = false)
-    private LocalDate orderDate;
+    private LocalDateTime orderDate;
 
     @Column(name = "delivery_date")
-    private LocalDate deliveryDate;
+    private LocalDateTime deliveryDate;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id",
@@ -61,7 +61,7 @@ public class Order {
     @JsonIgnore
     private User user;
 
-    public Order(Long userId, Double totalAmount, OrderStatus status, OrderPaymentStatus paymentStatus, String paymentMethod, String shippingAddress, String shippingMethod, LocalDate orderDate, LocalDate deliveryDate) {
+    public Order(Long userId, Double totalAmount, OrderStatus status, OrderPaymentStatus paymentStatus, String paymentMethod, String shippingAddress, String shippingMethod, LocalDateTime orderDate, LocalDateTime deliveryDate) {
         this.userId = userId;
         this.totalAmount = totalAmount;
         this.status = status;

@@ -18,7 +18,7 @@ public class Category {
     private Long id;
 
     @Column(name = "parent_id", nullable = false)
-    private Long parent_id;
+    private Long parentId;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -52,8 +52,8 @@ public class Category {
     @JsonIgnore
     private List<ProductCategory> products;
 
-    public Category(Long parent_id, String title, String description, String metaTitle, String metaDescription, String metaKeywords, String slug, Category parent, List<Category> subcategories, List<ProductCategory> products) {
-        this.parent_id = parent_id;
+    public Category(Long parentId, String title, String description, String metaTitle, String metaDescription, String metaKeywords, String slug, Category parent, List<Category> subcategories, List<ProductCategory> products) {
+        this.parentId = parentId;
         this.title = title;
         this.description = description;
         this.metaTitle = metaTitle;

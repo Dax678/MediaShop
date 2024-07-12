@@ -1,20 +1,18 @@
 package org.example.mediashop.Controller;
 
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import org.example.mediashop.Data.Entity.Product;
+import org.example.mediashop.Data.DTO.ProductDTO;
 import org.example.mediashop.Service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -35,8 +33,8 @@ public class ProductController {
      * @throws ConstraintViolationException If the provided id is not a positive integer.
      */
     @GetMapping(value = "/id/{id}")
-    public ResponseEntity<Map<String, Product>> getProductById(@PathVariable("id") @Positive final Long id) {
-        Product product = productService.getProductById(id);
+    public ResponseEntity<Map<String, ProductDTO>> getProductById(@PathVariable("id") @Positive final Long id) {
+        ProductDTO product = productService.getProductById(id);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("product", product));
     }
 
@@ -48,8 +46,14 @@ public class ProductController {
      * @throws ConstraintViolationException If the provided name is not a non-empty string.
      */
     @GetMapping(value = "/name/{name}")
-    public ResponseEntity<Map<String, Product>> getProductByName(@PathVariable("name") @NotBlank final String name) {
-        Product product = productService.getProductByName(name);
+    public ResponseEntity<Map<String, ProductDTO>> getProductByName(@PathVariable("name") @NotBlank final String name) {
+        ProductDTO product = productService.getProductByName(name);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("product", product));
+    }
+
+    @PostMapping(value = "/new")
+    public ResponseEntity<Map<String, ProductDTO>> createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        ProductDTO product = productService.addProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("product", product));
     }
 }

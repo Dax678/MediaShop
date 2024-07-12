@@ -1,4 +1,4 @@
-package org.example.mediashop.Payload;
+package org.example.mediashop.Payload.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

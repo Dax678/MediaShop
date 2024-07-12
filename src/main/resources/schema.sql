@@ -29,12 +29,33 @@ CREATE TABLE IF NOT EXISTS public.attribute
     name VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS public.discount
+(
+    id                  SERIAL PRIMARY KEY,
+    value               DOUBLE PRECISION NOT NULL,
+    code                VARCHAR(255)     NOT NULL,
+    start_date          DATE             NOT NULL,
+    end_date            DATE             NOT NULL,
+    max_usage           INTEGER          NOT NULL,
+    min_purchase_amount DOUBLE PRECISION NOT NULL,
+    created_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS public.product_category
 (
     product_id  INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
     FOREIGN KEY (product_id) REFERENCES public.product (id),
     FOREIGN KEY (category_id) REFERENCES public.category (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.product_discount
+(
+    product_id  INTEGER NOT NULL,
+    discount_id INTEGER NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES public.product (id),
+    FOREIGN KEY (discount_id) REFERENCES public.discount (id)
 );
 
 CREATE TABLE IF NOT EXISTS public.product_attribute
@@ -63,7 +84,7 @@ CREATE TABLE IF NOT EXISTS public.user
     password        VARCHAR(255) NOT NULL,
     email           VARCHAR(255) NOT NULL UNIQUE,
     role            VARCHAR(255) NOT NULL,
-    user_details_id INTEGER UNIQUE REFERENCES public.user_details(id)
+    user_details_id INTEGER UNIQUE REFERENCES public.user_details (id)
 );
 
 CREATE TABLE IF NOT EXISTS public."order"
@@ -86,8 +107,8 @@ CREATE TABLE IF NOT EXISTS public.order_item
     id         SERIAL PRIMARY KEY,
     order_id   INTEGER        NOT NULL REFERENCES public.order (id),
     product_id INTEGER        NOT NULL REFERENCES public.product (id),
+    discount_id   INTEGER,
     price      NUMERIC(10, 2) NOT NULL,
-    discount   NUMERIC(10, 2) NOT NULL,
-    createdAt  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedAt  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

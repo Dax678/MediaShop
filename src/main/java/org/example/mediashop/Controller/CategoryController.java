@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import org.example.mediashop.Data.Entity.Category;
+import org.example.mediashop.Data.DTO.CategoryDTO;
 import org.example.mediashop.Service.CategoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,8 @@ public class CategoryController {
      * @return ResponseEntity containing a map with a key "category" and a list of Category objects as its value.
      */
     @GetMapping
-    public ResponseEntity<Map<String, List<Category>>> getAllCategories() {
-        List<Category> category = categoryService.getAllCategories();
+    public ResponseEntity<Map<String, List<CategoryDTO>>> getAllCategories() {
+        List<CategoryDTO> category = categoryService.getAllCategories();
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
     }
 
@@ -47,8 +47,8 @@ public class CategoryController {
      * @throws ConstraintViolationException If the provided id is not a positive number.
      */
     @GetMapping(value = "/id/{id}")
-    public ResponseEntity<Map<String, Category>> getCategoryById(@PathVariable(value = "id") @Positive final Long id) {
-        Category category = categoryService.getCategoryById(id);
+    public ResponseEntity<Map<String, CategoryDTO>> getCategoryById(@PathVariable(value = "id") @Positive final Long id) {
+        CategoryDTO category = categoryService.getCategoryById(id);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
     }
 
@@ -60,8 +60,8 @@ public class CategoryController {
      * @throws ConstraintViolationException If the provided title is not a non-empty string.
      */
     @GetMapping(value = "/title/{title}")
-    public ResponseEntity<Map<String, Category>> getCategoryByTitle(@PathVariable(value = "title") @NotBlank final String title) {
-        Category category = categoryService.getCategoryByTitle(title);
+    public ResponseEntity<Map<String, CategoryDTO>> getCategoryByTitle(@PathVariable(value = "title") @NotBlank final String title) {
+        CategoryDTO category = categoryService.getCategoryByTitle(title);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
     }

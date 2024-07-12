@@ -2,7 +2,10 @@ package org.example.mediashop.Data.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -45,6 +48,10 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     @JsonIgnore
+    private List<ProductDiscount> discounts;
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
     private List<ProductAttribute> attributes;
 
     @OneToMany(mappedBy = "product")
@@ -62,5 +69,18 @@ public class Product {
         this.categories = categories;
         this.attributes = attributes;
         this.orders = orders;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "id = " + id + ", " +
+                "name = " + name + ", " +
+                "description = " + description + ", " +
+                "shortDescription = " + shortDescription + ", " +
+                "brand = " + brand + ", " +
+                "image = " + image + ", " +
+                "unitPrice = " + unitPrice + ", " +
+                "quantityPerUnit = " + quantityPerUnit + ")";
     }
 }

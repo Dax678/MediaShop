@@ -37,4 +37,16 @@ FROM public.user us
               ON ord.id = oi.order_id
          JOIN public.product pr
               ON oi.product_id = pr.id
-GROUP BY ord.id, us.username
+GROUP BY ord.id, us.username;
+
+SELECT ord.id, oi.id, oi.price, oi.discount_id
+FROM public.order ord
+JOIN public.order_item oi
+ON ord.id = oi.order_id
+JOIN public.product pr
+ON oi.product_id = pr.id
+JOIN public.product_discount pd
+ON pr.id = pd.product_id
+JOIN public.discount dis
+ON pd.discount_id = dis.id
+WHERE ord.id = 1;

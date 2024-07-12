@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -36,20 +37,23 @@ class CategoryControllerTest extends IntegrationTest {
         postgres.stop();
     }
 
+    List<Category> categoryList;
+
     @BeforeEach
     void setUp() {
         RestAssured.baseURI = "http://localhost:" + port;
         categoryRepository.deleteAll();
+
+        categoryList = new ArrayList<>();
+        categoryList.add(new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null));
+        categoryList.add(new Category(null, "CategoryTitle2", "CategoryDescription2", "MetaTitle2", "MetaDescription2", "new, category", "new-category-2", null, null, null));
+        categoryList.add(new Category(null, "CategoryTitle3", "CategoryDescription3", "MetaTitle3", "MetaDescription3", "new, category", "new-category-3", null, null, null));
+
+        categoryRepository.saveAll(categoryList);
     }
 
     @Test
     void shouldGetAllCategories() {
-        categoryRepository.saveAll(List.of(
-                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null),
-                new Category(null, "CategoryTitle2", "CategoryDescription2", "MetaTitle2", "MetaDescription2", "new, category", "new-category-2", null, null, null),
-                new Category(null, "CategoryTitle3", "CategoryDescription3", "MetaTitle3", "MetaDescription3", "new, category", "new-category-3", null, null, null)
-        ));
-
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -62,6 +66,7 @@ class CategoryControllerTest extends IntegrationTest {
 
     @Test
     void getAllCategories_shouldReturn404_whenCategoryNotFound() {
+        categoryRepository.deleteAll();
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -75,24 +80,20 @@ class CategoryControllerTest extends IntegrationTest {
 
     @Test
     void shouldGetCategoryById() {
-        Category category = categoryRepository.save(
-                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null)
-        );
-
         // Given
         given()
                 .contentType(ContentType.JSON)
                 .when()
-                .get("/api/v1/categories/id/{0}", category.getId().intValue())
+                .get("/api/v1/categories/id/{0}", categoryList.getFirst().getId().intValue())
                 .then()
                 .statusCode(200)
-                .body("category.id", is(category.getId().intValue()))
-                .body("category.title", is(category.getTitle()))
-                .body("category.description", is(category.getDescription()))
-                .body("category.metaTitle", is(category.getMetaTitle()))
-                .body("category.metaDescription", is(category.getMetaDescription()))
-                .body("category.metaKeywords", is(category.getMetaKeywords()))
-                .body("category.slug", is(category.getSlug()));
+                .body("category.id", is(categoryList.getFirst().getId().intValue()))
+                .body("category.title", is(categoryList.getFirst().getTitle()))
+                .body("category.description", is(categoryList.getFirst().getDescription()))
+                .body("category.metaTitle", is(categoryList.getFirst().getMetaTitle()))
+                .body("category.metaDescription", is(categoryList.getFirst().getMetaDescription()))
+                .body("category.metaKeywords", is(categoryList.getFirst().getMetaKeywords()))
+                .body("category.slug", is(categoryList.getFirst().getSlug()));
     }
 
     @Test
@@ -106,7 +107,7 @@ class CategoryControllerTest extends IntegrationTest {
                 .get("/api/v1/categories/id/{0}", categoryId)
                 .then()
                 .statusCode(400)
-                .body("message", is("Validation error: getCategoryById.id: must be greater than " + categoryId))
+                .body("message", is("getCategoryById.id: must be greater than " + categoryId))
                 .body("statusCode", is(400));
     }
 
@@ -127,10 +128,6 @@ class CategoryControllerTest extends IntegrationTest {
 
     @Test
     void shouldGetCategoryByTitle() {
-        Category category = categoryRepository.save(
-                new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null)
-        );
-
         // Given
         given()
                 .contentType(ContentType.JSON)
@@ -138,13 +135,13 @@ class CategoryControllerTest extends IntegrationTest {
                 .get("/api/v1/categories/title/CategoryTitle")
                 .then()
                 .statusCode(200)
-                .body("category.id", is(category.getId().intValue()))
-                .body("category.title", is(category.getTitle()))
-                .body("category.description", is(category.getDescription()))
-                .body("category.metaTitle", is(category.getMetaTitle()))
-                .body("category.metaDescription", is(category.getMetaDescription()))
-                .body("category.metaKeywords", is(category.getMetaKeywords()))
-                .body("category.slug", is(category.getSlug()));
+                .body("category.id", is(categoryList.getFirst().getId().intValue()))
+                .body("category.title", is(categoryList.getFirst().getTitle()))
+                .body("category.description", is(categoryList.getFirst().getDescription()))
+                .body("category.metaTitle", is(categoryList.getFirst().getMetaTitle()))
+                .body("category.metaDescription", is(categoryList.getFirst().getMetaDescription()))
+                .body("category.metaKeywords", is(categoryList.getFirst().getMetaKeywords()))
+                .body("category.slug", is(categoryList.getFirst().getSlug()));
     }
 
     @Test
@@ -156,7 +153,7 @@ class CategoryControllerTest extends IntegrationTest {
                 .get("/api/v1/categories/title/{0}", " ")
                 .then()
                 .statusCode(400)
-                .body("message", is("Validation error: getCategoryByTitle.title: must not be blank"))
+                .body("message", is("getCategoryByTitle.title: must not be blank"))
                 .body("statusCode", is(400));
     }
 

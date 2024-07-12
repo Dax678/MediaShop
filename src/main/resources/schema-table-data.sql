@@ -151,17 +151,31 @@ VALUES (1, 1, 1, 'Black'),
        (37, 20, 6, '15.6 inches'),
        (38, 20, 7, '2.3 kg');
 
-INSERT INTO public.user (username, password, email, role, user_details_id)
-VALUES ('user1', '$2a$10$dXJ3SW6G7P50lGmMkknnYO.2KLEkBcIh4J74E4VyawoG9.UnUohN6', 'user1@example.com', 'USER', 1);
+INSERT INTO public.discount (id, code, value, start_date, end_date, max_usage, min_purchase_amount)
+VALUES (1, 'SUMMER20', 20, '2022-06-01', '2022-08-31', 500, 500),
+       (2, 'WINTER20', 15, '2022-12-01', '2023-02-28', 1000, 1000),
+       (3, 'BLACKFRIDAY', 30, '2022-11-25', '2022-11-25', 1, 0),
+       (4, 'NEWYEAR20', 10, '2022-01-01', '2022-01-03', 200, 200),
+       (5, 'VALENTINESDAY', 25, '2022-02-14', '2022-02-14', 500, 500);
+
+INSERT INTO public.product_discount (product_id, discount_id)
+VALUES (1, 1),
+       (2, 2),
+       (3, 3),
+       (4, 4),
+       (5, 5);
 
 INSERT INTO public.user_details (id, first_name, last_name, address, phone_number)
 VALUES (1, 'John', 'Doe', '123 Main St', '123-456-7890');
 
+INSERT INTO public.user (username, password, email, role, user_details_id)
+VALUES ('user1', '$2a$10$dXJ3SW6G7P50lGmMkknnYO.2KLEkBcIh4J74E4VyawoG9.UnUohN6', 'user1@example.com', 'USER', 1);
+
 INSERT INTO public.order (id, user_id, total_amount, status, payment_status, payment_method, shipping_address,
                           shipping_method, order_date, delivery_date)
-VALUES (1, 2, 1000, 'In-progress', 'Waiting for payment', 'credit card', 'address', 'courier', '2022-01-01', null);
+VALUES (1, 2, 1000, 'COMPLETED', 'PAID', 'credit card', 'address', 'courier', '2022-01-01', null);
 
-INSERT INTO public.order_item (order_id, product_id, price, discount, created_at, updated_at)
-VALUES (1, 1, 100.00, 0.00, '2023-01-01', '2023-01-01'),
-       (1, 2, 50.00, 10.00, '2023-01-01', '2023-01-01'),
-       (1, 3, 25.00, 5.00, '2023-01-01', '2023-01-01');
+INSERT INTO public.order_item (order_id, product_id, price, discount_id, created_at, updated_at)
+VALUES (1, 1, 100.00, 1, '2023-01-01', '2023-01-01'),
+       (1, 2, 50.00, 2, '2023-01-01', '2023-01-01'),
+       (1, 3, 25.00, null, '2023-01-01', '2023-01-01');
