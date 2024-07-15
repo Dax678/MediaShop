@@ -43,4 +43,10 @@ public class ProductDTO implements Serializable {
     @Positive(message = "QuantityPerUnit must be greater than zero")
     @NotNull
     Integer quantityPerUnit;
+
+    @NotNull
+    Float rating;
+
+    @NotNull
+    Boolean isAvailable;
 }

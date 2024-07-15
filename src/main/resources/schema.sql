@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS public.product
     brand             VARCHAR(255)     NOT NULL,
     image             VARCHAR(255)     NOT NULL,
     unit_price        DOUBLE PRECISION NOT NULL,
-    quantity_per_unit INTEGER          NOT NULL
+    quantity_per_unit INTEGER          NOT NULL,
+    rating            DOUBLE PRECISION NOT NULL,
+    is_available       BOOLEAN          NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.category
@@ -104,11 +106,11 @@ CREATE TABLE IF NOT EXISTS public."order"
 
 CREATE TABLE IF NOT EXISTS public.order_item
 (
-    id         SERIAL PRIMARY KEY,
-    order_id   INTEGER        NOT NULL REFERENCES public.order (id),
-    product_id INTEGER        NOT NULL REFERENCES public.product (id),
-    discount_id   INTEGER,
-    price      NUMERIC(10, 2) NOT NULL,
-    created_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id          SERIAL PRIMARY KEY,
+    order_id    INTEGER        NOT NULL REFERENCES public.order (id),
+    product_id  INTEGER        NOT NULL REFERENCES public.product (id),
+    discount_id INTEGER,
+    price       NUMERIC(10, 2) NOT NULL,
+    created_at  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

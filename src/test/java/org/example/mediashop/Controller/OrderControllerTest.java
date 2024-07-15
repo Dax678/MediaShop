@@ -73,7 +73,7 @@ class OrderControllerTest extends IntegrationTest {
         orderList.add(new Order(user.getId(), 200.0, OrderStatus.CANCELLED, OrderPaymentStatus.RETURNED, "Credit Card", "456 Elm St, City, State, Zip", "Standard Shipping", LocalDateTime.parse("2024-07-10T00:00:00"), LocalDateTime.parse("2024-07-13T00:00:00")));
         orderRepository.saveAll(orderList);
 
-        product = productRepository.save(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, null, null, null));
+        product = productRepository.save(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 5.0F, true));
     }
 
     @Test

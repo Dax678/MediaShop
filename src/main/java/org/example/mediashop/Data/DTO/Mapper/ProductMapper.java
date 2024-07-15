@@ -13,7 +13,9 @@ public class ProductMapper {
                 product.getBrand(),
                 product.getImage(),
                 product.getUnitPrice(),
-                product.getQuantityPerUnit()
+                product.getQuantityPerUnit(),
+                product.getRating(),
+                product.getIsAvailable()
         );
     }
 
@@ -27,6 +29,8 @@ public class ProductMapper {
         product.setImage(productDTO.getImage());
         product.setUnitPrice(productDTO.getUnitPrice());
         product.setQuantityPerUnit(productDTO.getQuantityPerUnit());
+        product.setRating(productDTO.getRating());
+        product.setIsAvailable(productDTO.getIsAvailable());
         return product;
     }
 }

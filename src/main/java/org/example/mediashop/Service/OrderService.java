@@ -58,14 +58,14 @@ public class OrderService {
     }
 
     public List<OrderDTO> getOrderByStatusAndUserId(String status, Long userId) {
-        List<Order> order = orderRepository.findOrderByStatusAndUser_Id(OrderStatus.valueOf(status), userId);
+        List<Order> orderList = orderRepository.findOrderByStatusAndUser_Id(OrderStatus.valueOf(status), userId);
 
-        if (order.isEmpty()) {
+        if (orderList.isEmpty()) {
             logger.warn("Order with status: {} and user id: {} not found", status, userId);
             throw new NotFoundException("Order with status: {0} and user id: {1} not found", status, userId);
         }
 
-        return order.stream()
+        return orderList.stream()
                 .map(OrderMapper::toOrderDTO)
                 .collect(Collectors.toList());
     }

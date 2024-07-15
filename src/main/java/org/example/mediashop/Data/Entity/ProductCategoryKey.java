@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode
+@AllArgsConstructor
 public class ProductCategoryKey implements Serializable {
     @Column(name = "product_id", nullable = false)
     private Long productId;

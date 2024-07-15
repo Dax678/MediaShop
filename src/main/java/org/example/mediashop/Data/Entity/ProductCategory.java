@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class ProductCategory {
 
     @EmbeddedId

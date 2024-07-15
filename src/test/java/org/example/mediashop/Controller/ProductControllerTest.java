@@ -49,8 +49,8 @@ class ProductControllerTest extends IntegrationTest {
         productRepository.deleteAll();
 
         productList = new ArrayList<>();
-        productList.add(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, null, null, null));
-        productList.add(new Product("ProductName2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, null, null, null));
+        productList.add(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 5.0F, true));
+        productList.add(new Product("ProductName2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 4.0F, true));
         productRepository.saveAll(productList);
     }
 
@@ -161,6 +161,8 @@ class ProductControllerTest extends IntegrationTest {
         product.put("image", "Diax.img.png");
         product.put("unitPrice", 1999.99);
         product.put("quantityPerUnit", 1);
+        product.put("rating", 5.0F);
+        product.put("isAvailable", false);
 
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(product);
@@ -180,7 +182,9 @@ class ProductControllerTest extends IntegrationTest {
                 .body("product.brand", is("Diax"))
                 .body("product.image", is("Diax.img.png"))
                 .body("product.unitPrice", is( 1999.99F))
-                .body("product.quantityPerUnit", is(1));
+                .body("product.quantityPerUnit", is(1))
+                .body("product.rating", is(5.0F))
+                .body("product.isAvailable", is(false));
     }
 
 }

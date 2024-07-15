@@ -42,6 +42,12 @@ public class Product {
     @Column(name = "quantity_per_unit", nullable = false)
     private Integer quantityPerUnit;
 
+    @Column(name = "rating", nullable = false)
+    private Float rating;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable;
+
     @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<ProductCategory> categories;
@@ -58,7 +64,7 @@ public class Product {
     @JsonIgnore
     private List<OrderItem> orders;
 
-    public Product(String name, String description, String shortDescription, String brand, String image, Double unitPrice, Integer quantityPerUnit, List<ProductCategory> categories, List<ProductAttribute> attributes, List<OrderItem> orders) {
+    public Product(String name, String description, String shortDescription, String brand, String image, Double unitPrice, Integer quantityPerUnit, Float rating, Boolean isAvailable) {
         this.name = name;
         this.description = description;
         this.shortDescription = shortDescription;
@@ -66,9 +72,8 @@ public class Product {
         this.image = image;
         this.unitPrice = unitPrice;
         this.quantityPerUnit = quantityPerUnit;
-        this.categories = categories;
-        this.attributes = attributes;
-        this.orders = orders;
+        this.rating = rating;
+        this.isAvailable = isAvailable;
     }
 
     @Override
