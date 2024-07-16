@@ -3,7 +3,9 @@ package org.example.mediashop.Controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.example.mediashop.Data.Entity.Product;
+import org.example.mediashop.Data.Entity.User;
 import org.example.mediashop.Repository.ProductRepository;
+import org.example.mediashop.Repository.UserRepository;
 import org.example.mediashop.TestConfig.IntegrationTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,6 +34,12 @@ class ProductControllerTest extends IntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeAll
     static void beforeAll() {
         postgres.start();
@@ -43,21 +52,37 @@ class ProductControllerTest extends IntegrationTest {
 
     List<Product> productList;
 
+    String token;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
         productRepository.deleteAll();
+        userRepository.deleteAll();
 
         productList = new ArrayList<>();
         productList.add(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 5.0F, true));
         productList.add(new Product("ProductName2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 4.0F, true));
         productRepository.saveAll(productList);
+
+        userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
+        userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
+
+
+        token = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
     }
 
     @Test
     void shouldGetProductById() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productList.getFirst().getId().intValue())
@@ -79,6 +104,7 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productId)
@@ -94,6 +120,7 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productId)
@@ -108,6 +135,7 @@ class ProductControllerTest extends IntegrationTest {
         String productName = "ProductName2";
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", productName)
@@ -127,6 +155,7 @@ class ProductControllerTest extends IntegrationTest {
     void getProductByName_shouldReturn400_whenProductNameIsBlank() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", " ")
@@ -142,6 +171,7 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", productName)
@@ -167,8 +197,17 @@ class ProductControllerTest extends IntegrationTest {
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(product);
 
+        String adminToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
         // Given
         given()
+                .header("Authorization", "Bearer " + adminToken)
                 .contentType(ContentType.JSON)
                 .when()
                 .body(jsonBody)

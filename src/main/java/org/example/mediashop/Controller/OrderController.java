@@ -7,11 +7,13 @@ import lombok.AllArgsConstructor;
 import org.example.mediashop.Configuration.Exception.ValueOfEnum;
 import org.example.mediashop.Data.DTO.OrderDTO;
 import org.example.mediashop.Data.Entity.OrderStatus;
+import org.example.mediashop.Data.Entity.UserDetailsImpl;
 import org.example.mediashop.Service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,6 +72,7 @@ public class OrderController {
 
     /**
      * This method updates the status of an order based on its unique identifier and the new status.
+     * Order can be updated only by owner.
      *
      * @param id     The unique identifier of the order to update. It must be a positive number.
      * @param status The new status of the order.
@@ -78,8 +81,9 @@ public class OrderController {
      */
     @PutMapping(value = "/id/{id}/status/{status}")
     public ResponseEntity<Map<String, OrderDTO>> updateOrderStatusById(@PathVariable("id") @Positive final Long id,
-                                                                       @PathVariable("status") @Valid @ValueOfEnum(enumClass = OrderStatus.class) final String status) {
-        OrderDTO order = orderService.updateOrderStatusById(id, status);
+                                                                       @PathVariable("status") @Valid @ValueOfEnum(enumClass = OrderStatus.class) final String status,
+                                                                       @AuthenticationPrincipal UserDetailsImpl principal) {
+        OrderDTO order = orderService.updateOrderStatusById(id, status, principal);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("order", order));
     }
 

@@ -22,12 +22,14 @@ public class UserDetails {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address")
     private String address;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number")
     private String phone;
 
     @OneToOne(mappedBy = "userDetails")
     private User user;
+
+
 }

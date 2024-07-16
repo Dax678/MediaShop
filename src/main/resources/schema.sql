@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS public.user_details
     id           SERIAL PRIMARY KEY,
     first_name   VARCHAR(255) NOT NULL,
     last_name    VARCHAR(255) NOT NULL,
-    address      VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(255) NOT NULL
+    address      VARCHAR(255),
+    phone_number VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS public.user

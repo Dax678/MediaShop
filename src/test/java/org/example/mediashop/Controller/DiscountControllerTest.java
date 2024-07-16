@@ -3,7 +3,9 @@ package org.example.mediashop.Controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.example.mediashop.Data.Entity.Discount;
+import org.example.mediashop.Data.Entity.User;
 import org.example.mediashop.Repository.DiscountRepository;
+import org.example.mediashop.Repository.UserRepository;
 import org.example.mediashop.TestConfig.IntegrationTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,6 +35,12 @@ public class DiscountControllerTest extends IntegrationTest  {
     @Autowired
     private DiscountRepository discountRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeAll
     static void beforeAll() {
         postgres.start();
@@ -44,21 +53,36 @@ public class DiscountControllerTest extends IntegrationTest  {
 
     List<Discount> discountList;
 
+    String token;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
         discountRepository.deleteAll();
+        userRepository.deleteAll();
 
         discountList = new ArrayList<>();
         discountList.add(discountRepository.save(new Discount(100.0, "DiscountCode1",  LocalDateTime.parse("2024-07-10T00:00:00"),  LocalDateTime.parse("2024-07-15T00:00:00"), 1, 0.0)));
         discountList.add(discountRepository.save(new Discount(100.0, "DiscountCode2",  LocalDateTime.parse("2024-07-10T00:00:00"),  LocalDateTime.parse("2024-07-15T00:00:00"), 1, 0.0)));
         discountRepository.saveAll(discountList);
+
+        userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
+        userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
+
+        token = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
     }
 
     @Test
     void shouldGetDiscountById() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountList.getFirst().getId().intValue())
@@ -79,6 +103,7 @@ public class DiscountControllerTest extends IntegrationTest  {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountId)
@@ -94,6 +119,7 @@ public class DiscountControllerTest extends IntegrationTest  {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountId)
@@ -116,8 +142,17 @@ public class DiscountControllerTest extends IntegrationTest  {
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(discount);
 
+        String adminToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
         // Given
         given()
+                .header("Authorization", "Bearer " + adminToken)
                 .contentType(ContentType.JSON)
                 .when()
                 .body(jsonBody)

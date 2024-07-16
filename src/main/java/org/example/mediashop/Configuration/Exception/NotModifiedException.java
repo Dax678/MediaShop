@@ -2,7 +2,7 @@ package org.example.mediashop.Configuration.Exception;
 
 import java.text.MessageFormat;
 
-public class NotModifiedException  extends RuntimeException {
+public class NotModifiedException extends RuntimeException {
     public NotModifiedException(String message) {
         super(message);
     }

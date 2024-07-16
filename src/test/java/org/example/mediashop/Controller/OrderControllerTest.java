@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,10 +44,15 @@ class OrderControllerTest extends IntegrationTest {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     User user;
 
     Product product;
     List<Order> orderList;
+
+    String token;
 
     @BeforeAll
     static void beforeAll() {
@@ -59,14 +65,15 @@ class OrderControllerTest extends IntegrationTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
         orderItemRepository.deleteAll();
         orderRepository.deleteAll();
         productRepository.deleteAll();
         userRepository.deleteAll();
 
-        user = userRepository.save(new User("username", "password", "email", "USER"));
+        user = userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
+        userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
 
         orderList = new ArrayList<>();
         orderList.add(new Order(user.getId(), 100.0, OrderStatus.DELIVERED, OrderPaymentStatus.COMPLETED, "Credit Card", "123 Main St, City, State, Zip", "Standard Shipping", LocalDateTime.parse("2024-07-10T00:00:00"), LocalDateTime.parse("2024-07-15T00:00:00")));
@@ -74,12 +81,21 @@ class OrderControllerTest extends IntegrationTest {
         orderRepository.saveAll(orderList);
 
         product = productRepository.save(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 5.0F, true));
+
+        token = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
     }
 
     @Test
     void shouldGetOrderById() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/id/{0}", orderList.getFirst().getId().intValue())
@@ -102,6 +118,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/id/{0}", orderId)
@@ -117,6 +134,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/id/{0}", orderId)
@@ -130,6 +148,7 @@ class OrderControllerTest extends IntegrationTest {
     void shouldGetOrdersByStatus() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}", OrderStatus.CANCELLED)
@@ -153,6 +172,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}", orderStatus)
@@ -168,6 +188,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}", orderStatus)
@@ -181,6 +202,7 @@ class OrderControllerTest extends IntegrationTest {
     void shouldGetOrdersByStatusAndUserId() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}/userId/{1}", OrderStatus.DELIVERED, orderList.getFirst().getUserId())
@@ -204,6 +226,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}/userId/{1}", orderStatus, orderList.getFirst().getUserId())
@@ -219,6 +242,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}/userId/{1}", OrderStatus.DELIVERED, userId)
@@ -234,6 +258,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given - Status not found
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}/userId/{1}", orderStatus, orderList.getFirst().getUserId())
@@ -249,6 +274,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/orders/status/{0}/userId/{1}", OrderStatus.DELIVERED, userId)
@@ -264,6 +290,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .put("/api/v1/orders/id/{0}/status/{1}", orderList.getFirst().getId(), expectedOrderStatus)
@@ -286,6 +313,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .put("/api/v1/orders/id/{0}/status/{1}", orderId, expectedOrderStatus)
@@ -301,6 +329,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .put("/api/v1/orders/id/{0}/status/{1}", orderList.getFirst().getId(), expectedOrderStatus)
@@ -317,6 +346,7 @@ class OrderControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .put("/api/v1/orders/id/{0}/status/{1}", orderId, expectedOrderStatus)
@@ -336,7 +366,7 @@ class OrderControllerTest extends IntegrationTest {
         order.put("shippingAddress", "123 Main St, City, State, Zip Code");
         order.put("shippingMethod", "STANDARD");
         order.put("orderDate", "2024-07-10T00:00:00");
-        order.put("deliveryDate", "2024-07-15T00:00:00");
+        order.put("deliveryDate", "2027-07-15T00:00:00");
 
         List<Map<String, Object>> products = new ArrayList<>();
         Map<String, Object> productMap = new HashMap<>();
@@ -349,8 +379,17 @@ class OrderControllerTest extends IntegrationTest {
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(order);
 
+        String adminToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
         // Given
         given()
+                .header("Authorization", "Bearer " + adminToken)
                 .contentType(ContentType.JSON)
                 .when()
                 .body(jsonBody)
@@ -366,7 +405,7 @@ class OrderControllerTest extends IntegrationTest {
                 .body("order.shippingAddress", is("123 Main St, City, State, Zip Code"))
                 .body("order.shippingMethod", is("STANDARD"))
                 .body("order.orderDate", is("2024-07-10T00:00:00"))
-                .body("order.deliveryDate", is("2024-07-15T00:00:00"))
+                .body("order.deliveryDate", is("2027-07-15T00:00:00"))
                 .body("order.products[0].productId", is(product.getId().intValue()))
                 .body("order.products[0].discountId", is(3));
     }
@@ -383,7 +422,7 @@ class OrderControllerTest extends IntegrationTest {
         order.put("shippingAddress", "123 Main St, City, State, Zip Code");
         order.put("shippingMethod", "STANDARD");
         order.put("orderDate", "2024-07-10T00:00:00");
-        order.put("deliveryDate", "2024-07-15T00:00:00");
+        order.put("deliveryDate", "2027-07-15T00:00:00");
 
         List<Map<String, Object>> products = new ArrayList<>();
         Map<String, Object> productMap = new HashMap<>();
@@ -396,8 +435,17 @@ class OrderControllerTest extends IntegrationTest {
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(order);
 
+        String adminToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
         // Given
         given()
+                .header("Authorization", "Bearer " + adminToken)
                 .contentType(ContentType.JSON)
                 .when()
                 .body(jsonBody)
@@ -420,7 +468,7 @@ class OrderControllerTest extends IntegrationTest {
         order.put("shippingAddress", "123 Main St, City, State, Zip Code");
         order.put("shippingMethod", "STANDARD");
         order.put("orderDate", "2024-07-10T00:00:00");
-        order.put("deliveryDate", "2024-07-15T00:00:00");
+        order.put("deliveryDate", "2027-07-15T00:00:00");
 
         List<Map<String, Object>> products = new ArrayList<>();
         Map<String, Object> productMap = new HashMap<>();
@@ -433,8 +481,17 @@ class OrderControllerTest extends IntegrationTest {
         // Convert the Map to JSON string
         String jsonBody = new ObjectMapper().writeValueAsString(order);
 
+        String adminToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
         // Given
         given()
+                .header("Authorization", "Bearer " + adminToken)
                 .contentType(ContentType.JSON)
                 .when()
                 .body(jsonBody)

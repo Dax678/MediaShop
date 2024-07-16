@@ -9,9 +9,11 @@ import org.example.mediashop.Data.DTO.OrderDTO;
 import org.example.mediashop.Data.DTO.ProductDTO;
 import org.example.mediashop.Data.Entity.Order;
 import org.example.mediashop.Data.Entity.OrderStatus;
+import org.example.mediashop.Data.Entity.UserDetailsImpl;
 import org.example.mediashop.Repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -70,12 +72,16 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public OrderDTO updateOrderStatusById(Long id, String status) {
+    public OrderDTO updateOrderStatusById(Long id, String status, UserDetailsImpl principal) {
         Optional<Order> order = orderRepository.findOrderById(id);
 
         if (order.isEmpty()) {
             logger.warn("Order with id: {} not found", id);
             throw new NotFoundException("Order with id: {0} not found", id);
+        }
+
+        if(!order.get().getUserId().equals(principal.getId())) {
+            throw new AccessDeniedException("Access is denied");
         }
 
         order.get().setStatus(OrderStatus.valueOf(status));

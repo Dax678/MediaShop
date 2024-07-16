@@ -3,7 +3,9 @@ package org.example.mediashop.Controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.example.mediashop.Data.Entity.Category;
+import org.example.mediashop.Data.Entity.User;
 import org.example.mediashop.Repository.CategoryRepository;
+import org.example.mediashop.Repository.UserRepository;
 import org.example.mediashop.TestConfig.IntegrationTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,9 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,6 +33,12 @@ class CategoryControllerTest extends IntegrationTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeAll
     static void beforeAll() {
         postgres.start();
@@ -39,10 +51,13 @@ class CategoryControllerTest extends IntegrationTest {
 
     List<Category> categoryList;
 
+    String token;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
         categoryRepository.deleteAll();
+        userRepository.deleteAll();
 
         categoryList = new ArrayList<>();
         categoryList.add(new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null));
@@ -50,12 +65,24 @@ class CategoryControllerTest extends IntegrationTest {
         categoryList.add(new Category(null, "CategoryTitle3", "CategoryDescription3", "MetaTitle3", "MetaDescription3", "new, category", "new-category-3", null, null, null));
 
         categoryRepository.saveAll(categoryList);
+
+        userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
+        userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
+
+        token = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
     }
 
     @Test
     void shouldGetAllCategories() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories")
@@ -69,6 +96,7 @@ class CategoryControllerTest extends IntegrationTest {
         categoryRepository.deleteAll();
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories")
@@ -82,6 +110,7 @@ class CategoryControllerTest extends IntegrationTest {
     void shouldGetCategoryById() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/id/{0}", categoryList.getFirst().getId().intValue())
@@ -102,6 +131,7 @@ class CategoryControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/id/{0}", categoryId)
@@ -117,6 +147,7 @@ class CategoryControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/id/{0}", categoryId)
@@ -130,6 +161,7 @@ class CategoryControllerTest extends IntegrationTest {
     void shouldGetCategoryByTitle() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/title/CategoryTitle")
@@ -148,6 +180,7 @@ class CategoryControllerTest extends IntegrationTest {
     void getCategoryByTitle_shouldReturn400_whenCategoryTitleIsBlank() {
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/title/{0}", " ")
@@ -163,6 +196,7 @@ class CategoryControllerTest extends IntegrationTest {
 
         // Given
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/categories/title/{0}", categoryName)
