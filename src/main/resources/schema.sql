@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS public.product
     image             VARCHAR(255)     NOT NULL,
     unit_price        DOUBLE PRECISION NOT NULL,
     quantity_per_unit INTEGER          NOT NULL,
-    rating            DOUBLE PRECISION NOT NULL,
-    is_available       BOOLEAN          NOT NULL
+    rating            DOUBLE PRECISION,
+    is_available      BOOLEAN          NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.category
