@@ -1,5 +1,6 @@
 package org.example.mediashop.Service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.example.mediashop.Configuration.Exception.NotFoundException;
 import org.example.mediashop.Data.DTO.CategoryDTO;
@@ -53,4 +54,21 @@ public class CategoryService {
         return CategoryMapper.toCategoryDTO(category.get());
     }
 
+    public List<CategoryDTO> getCategoriesByParentId(final Long parentId) {
+        List<Category> category = categoryRepository.findCategoriesByParentId(parentId);
+
+        if (category.isEmpty()) {
+            logger.warn("Category with parentId: {} not found", parentId);
+            throw new NotFoundException("Category with parentId: {0} not found", parentId);
+        }
+        return category.stream()
+                .map(CategoryMapper::toCategoryDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CategoryDTO addCategory(CategoryDTO categoryDTO) {
+        Category category = CategoryMapper.toCategoryEntity(categoryDTO);
+        return CategoryMapper.toCategoryDTO(categoryRepository.save(category));
+    }
 }

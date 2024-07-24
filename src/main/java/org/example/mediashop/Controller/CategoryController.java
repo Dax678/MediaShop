@@ -1,6 +1,7 @@
 package org.example.mediashop.Controller;
 
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -11,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -35,8 +33,8 @@ public class CategoryController {
      */
     @GetMapping
     public ResponseEntity<Map<String, List<CategoryDTO>>> getAllCategories() {
-        List<CategoryDTO> category = categoryService.getAllCategories();
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
+        List<CategoryDTO> categoryDTO = categoryService.getAllCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", categoryDTO));
     }
 
     /**
@@ -48,8 +46,8 @@ public class CategoryController {
      */
     @GetMapping(value = "/id/{id}")
     public ResponseEntity<Map<String, CategoryDTO>> getCategoryById(@PathVariable(value = "id") @Positive final Long id) {
-        CategoryDTO category = categoryService.getCategoryById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
+        CategoryDTO categoryDTO = categoryService.getCategoryById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", categoryDTO));
     }
 
     /**
@@ -61,8 +59,21 @@ public class CategoryController {
      */
     @GetMapping(value = "/title/{title}")
     public ResponseEntity<Map<String, CategoryDTO>> getCategoryByTitle(@PathVariable(value = "title") @NotBlank final String title) {
-        CategoryDTO category = categoryService.getCategoryByTitle(title);
+        CategoryDTO categoryDTO = categoryService.getCategoryByTitle(title);
 
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", category));
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", categoryDTO));
+    }
+
+    @GetMapping(value = "/parentId/{parentId}")
+    public ResponseEntity<Map<String, List<CategoryDTO>>> getCategoriesByParentId(@PathVariable(value = "parentId") @Positive final Long parentId) {
+        List<CategoryDTO> categoryDTO = categoryService.getCategoriesByParentId(parentId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("category", categoryDTO));
+    }
+
+    @PostMapping(value = "/new")
+    public ResponseEntity<Map<String, CategoryDTO>> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
+        CategoryDTO category = categoryService.addCategory(categoryDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("category", category));
     }
 }

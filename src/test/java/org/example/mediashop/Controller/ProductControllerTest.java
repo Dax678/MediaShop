@@ -2,8 +2,9 @@ package org.example.mediashop.Controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.example.mediashop.Data.Entity.Product;
-import org.example.mediashop.Data.Entity.User;
+import org.example.mediashop.Data.Entity.*;
+import org.example.mediashop.Repository.DiscountRepository;
+import org.example.mediashop.Repository.ProductDiscountRepository;
 import org.example.mediashop.Repository.ProductRepository;
 import org.example.mediashop.Repository.UserRepository;
 import org.example.mediashop.TestConfig.IntegrationTest;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,12 @@ class ProductControllerTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
+    private ProductDiscountRepository productDiscountRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeAll
@@ -52,11 +60,16 @@ class ProductControllerTest extends IntegrationTest {
 
     List<Product> productList;
 
+    List<Discount> discountList;
+
+    List<ProductDiscount> productDiscountList;
+
     String token;
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
+        productDiscountRepository.truncateAllData();
         productRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -64,6 +77,16 @@ class ProductControllerTest extends IntegrationTest {
         productList.add(new Product("ProductName1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 5.0F, true));
         productList.add(new Product("ProductName2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "ShortDescription", "BrandName", "image1.jpg", 100.0, 10, 4.0F, true));
         productRepository.saveAll(productList);
+
+        discountList = new ArrayList<>();
+        discountList.add(new Discount(100.0, "CODE1", LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), 1, 0.0));
+        discountList.add(new Discount(50.0, "CODE2", LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), 2, 100.0));
+        discountRepository.saveAll(discountList);
+
+        productDiscountList = new ArrayList<>();
+        productDiscountList.add(new ProductDiscount(new ProductDiscountKey(productList.get(0).getId(), discountList.get(0).getId()), productList.get(0), discountList.get(0)));
+        productDiscountList.add(new ProductDiscount(new ProductDiscountKey(productList.get(1).getId(), discountList.get(1).getId()), productList.get(1), discountList.get(1)));
+        productDiscountRepository.saveAll(productDiscountList);
 
         userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
         userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
@@ -82,7 +105,6 @@ class ProductControllerTest extends IntegrationTest {
     void shouldGetProductById() {
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productList.getFirst().getId().intValue())
@@ -104,7 +126,6 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productId)
@@ -120,7 +141,6 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/id/{0}", productId)
@@ -135,7 +155,6 @@ class ProductControllerTest extends IntegrationTest {
         String productName = "ProductName2";
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", productName)
@@ -155,7 +174,6 @@ class ProductControllerTest extends IntegrationTest {
     void getProductByName_shouldReturn400_whenProductNameIsBlank() {
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", " ")
@@ -171,13 +189,65 @@ class ProductControllerTest extends IntegrationTest {
 
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/name/{0}", productName)
                 .then()
                 .statusCode(404)
                 .body("message", is("Product with name: " + productName + " not found"))
+                .body("statusCode", is(404));
+    }
+
+    @Test
+    void shouldGetProductsByDiscount() {
+        String discountCode = "CODE1";
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/products/discountCode/{code}", discountCode)
+                .then()
+                .statusCode(200)
+                .body("product[0].id", is(productList.get(0).getId().intValue()))
+                .body("product[0].name", is(productList.get(0).getName()))
+                .body("product[0].description", is(productList.get(0).getDescription()))
+                .body("product[0].shortDescription", is(productList.get(0).getShortDescription()))
+                .body("product[0].brand", is(productList.get(0).getBrand()))
+                .body("product[0].image", is(productList.get(0).getImage()))
+                .body("product[0].unitPrice", is(productList.get(0).getUnitPrice().floatValue()))
+                .body("product[0].quantityPerUnit", is(productList.get(0).getQuantityPerUnit()))
+                .body("discount.id", is(discountList.get(0).getId().intValue()))
+                .body("discount.value", is(discountList.get(0).getValue().floatValue()))
+                .body("discount.code", is(discountList.get(0).getCode()))
+                .body("discount.maxUsage", is(discountList.get(0).getMaxUsage()))
+                .body("discount.minPurchaseAmount", is(discountList.get(0).getMinPurchaseAmount().floatValue()));
+    }
+
+    @Test
+    void getProductsByDiscount_shouldReturn400_whenDiscountCodeIsBlank() {
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/products/discountCode/{code}", " ")
+                .then()
+                .statusCode(400)
+                .body("message", is("getProductsByDiscount.discountCode: must not be blank"))
+                .body("statusCode", is(400));
+    }
+
+    @Test
+    void getProductsByDiscount_shouldReturn404_whenDiscountCodeNotFound() {
+        String discountCode = "CODE3";
+
+        // Given
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/v1/products/discountCode/{code}", discountCode)
+                .then()
+                .statusCode(404)
+                .body("message", is("Discount with code: " + discountCode + " not found"))
                 .body("statusCode", is(404));
     }
 
@@ -225,5 +295,4 @@ class ProductControllerTest extends IntegrationTest {
                 .body("product.rating", is(5.0F))
                 .body("product.isAvailable", is(false));
     }
-
 }

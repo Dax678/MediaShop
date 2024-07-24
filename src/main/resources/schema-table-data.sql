@@ -1017,19 +1017,15 @@ VALUES (1, 1, 1, 'Intel Core i7-1165G7'),
        (159, 5, 31, 'ABC54321'),
        (160, 5, 32, 'LAP-2023-005');
 
--- INSERT INTO public.discount (id, code, value, start_date, end_date, max_usage, min_purchase_amount)
--- VALUES (1, 'SUMMER20', 20, '2022-06-01', '2022-08-31', 500, 500),
---        (2, 'WINTER20', 15, '2022-12-01', '2023-02-28', 1000, 1000),
---        (3, 'BLACKFRIDAY', 30, '2022-11-25', '2022-11-25', 1, 0),
---        (4, 'NEWYEAR20', 10, '2022-01-01', '2022-01-03', 200, 200),
---        (5, 'VALENTINESDAY', 25, '2022-02-14', '2022-02-14', 500, 500);
---
--- INSERT INTO public.product_discount (product_id, discount_id)
--- VALUES (1, 1),
---        (2, 2),
---        (3, 3),
---        (4, 4),
---        (5, 5);
+INSERT INTO public.discount (id, code, value, start_date, end_date, max_usage, min_purchase_amount)
+VALUES (1, 'DAILY_PROMOTION', 500, '2024-07-18T00:00:00', '2024-07-18T23:59:59', 1, 0),
+       (2, 'DAILY_PROMOTION', 1000, '2024-07-19T00:00:00', '2024-07-19T23:59:59', 1, 0),
+       (3, 'DAILY_PROMOTION', 300, '2024-07-20T00:00:00', '2024-07-20T23:59:59', 1, 0);
+
+INSERT INTO public.product_discount (product_id, discount_id)
+VALUES (40, 1),
+       (40, 2),
+       (39,3);
 
 -- INSERT INTO public.user_details (id, first_name, last_name, address, phone_number)
 -- VALUES (1, 'John', 'Doe', '123 Main St', '123-456-7890');

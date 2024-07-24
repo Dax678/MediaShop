@@ -55,6 +55,7 @@ public class UserControllerTest extends IntegrationTest {
 
         user = userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
         userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
+
     }
 
     @Test
@@ -251,5 +252,59 @@ public class UserControllerTest extends IntegrationTest {
                 .body("error", is("Unauthorized"))
                 .body("message", is("Bad credentials"))
                 .body("status", is(401));
+    }
+
+    @Test
+    void authenticate_ShouldReturn200_WhenGuestHasValidRole() {
+        // Given
+        given()
+                .contentType(ContentType.TEXT)
+                .when()
+                .get("/api/v1/auth/roleTest/guest")
+                .then()
+                .statusCode(200)
+                .body(is("Guest Test Successfully"));
+    }
+
+    @Test
+    void authenticate_ShouldReturn200_WhenUserHasValidRole() throws JsonProcessingException {
+        String userToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
+        // Given
+        given()
+                .header("Authorization", "Bearer " + userToken)
+                .contentType(ContentType.TEXT)
+                .when()
+                .get("/api/v1/auth/roleTest/user")
+                .then()
+                .statusCode(200)
+                .body(is("User Role Test Successful"));
+    }
+
+    @Test
+    void authenticate_ShouldReturn200_WhenAdminHasValidRole() throws JsonProcessingException {
+        String userToken = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "adminTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
+
+        // Given
+        given()
+                .header("Authorization", "Bearer " + userToken)
+                .contentType(ContentType.TEXT)
+                .when()
+                .get("/api/v1/auth/roleTest/admin")
+                .then()
+                .statusCode(200)
+                .body(is("Admin Role Test Successful"));
     }
 }

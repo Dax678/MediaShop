@@ -40,4 +40,15 @@ public class DiscountService {
 
         return DiscountMapper.toDiscountDTO(discountRepository.save(discount));
     }
+
+    public DiscountDTO getDiscountByCode(String discountCode) {
+        Optional<Discount> discount = discountRepository.findByActiveCode(discountCode);
+
+        if(discount.isEmpty()) {
+            logger.warn("Discount with code: {} not found", discountCode);
+            throw new NotFoundException("Discount with code: {0} not found", discountCode);
+        }
+
+        return DiscountMapper.toDiscountDTO(discount.get());
+    }
 }

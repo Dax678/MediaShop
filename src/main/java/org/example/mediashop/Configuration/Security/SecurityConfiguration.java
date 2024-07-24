@@ -36,32 +36,42 @@ public class SecurityConfiguration {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(
-                                        "/api/v1/auth/signup",
-                                        "/api/v1/auth/login",
-                                        "/api/v1/auth/roleTest/guest" // Guest role test endpoint
-                                ).permitAll()
-                                .requestMatchers(
                                         "/api/v1/auth/roleTest/user" // User role test endpoint
                                 ).hasRole(ERole.USER.getRoleNameWithoutPrefix())
                                 .requestMatchers(
                                         "/api/v1/products/new",
+                                        "/api/v1/categories/new",
                                         "/api/v1/discounts/new",
                                         "/api/v1/orders/new",
                                         "/api/v1/auth/roleTest/admin" // Admin role test endpoint
                                 ).hasRole(ERole.ADMIN.getRoleNameWithoutPrefix())
                                 .requestMatchers(
-                                        "/api/v1/products/id/{id}",
-                                        "/api/v1/products/name/{name}",
-                                        "/api/v1/products/category/{category}",
-                                        "/api/v1/categories",
-                                        "/api/v1/categories/id/{id}",
-                                        "/api/v1/categories/title/{title}",
-                                        "/api/v1/discounts/id/{id}",
                                         "/api/v1/orders/id/{id}",
-                                        "/api/order/id/{id}/status/{status}",
+                                        "/api/v1/orders/id/{id}/status/{status}",
                                         "/api/v1/orders/status/{status}",
                                         "/api/v1/orders/status/{status}/userId/{userId}"
                                 ).hasAnyRole(ERole.USER.getRoleNameWithoutPrefix(), ERole.ADMIN.getRoleNameWithoutPrefix())
+                                .requestMatchers(
+                                        "/api/v1/auth/signup",
+                                        "/api/v1/auth/login",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v2/api-docs",
+                                        "/v3/api-docs",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources",
+                                        "/swagger-resources/**",
+                                        "/api/v1/auth/roleTest/guest", // Guest role test endpoint
+                                        "/api/v1/products/name/{name}",
+                                        "/api/v1/products/category/{category}",
+                                        "/api/v1/products/discountCode/{code}",
+                                        "/api/v1/products/id/{id}",
+                                        "/api/v1/categories",
+                                        "/api/v1/categories/id/{id}",
+                                        "/api/v1/categories/title/{title}",
+                                        "/api/v1/categories/parentId/{parentId}",
+                                        "/api/v1/discounts/id/{id}"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

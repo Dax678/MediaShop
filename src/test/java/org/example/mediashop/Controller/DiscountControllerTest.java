@@ -82,7 +82,6 @@ public class DiscountControllerTest extends IntegrationTest  {
     void shouldGetDiscountById() {
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountList.getFirst().getId().intValue())
@@ -103,7 +102,6 @@ public class DiscountControllerTest extends IntegrationTest  {
 
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountId)
@@ -119,7 +117,6 @@ public class DiscountControllerTest extends IntegrationTest  {
 
         // Given
         given()
-                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/discounts/id/{0}", discountId)

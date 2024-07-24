@@ -5,7 +5,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import org.example.mediashop.Data.DTO.DiscountDTO;
 import org.example.mediashop.Data.DTO.ProductDTO;
+import org.example.mediashop.Service.DiscountService;
 import org.example.mediashop.Service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,8 @@ public class ProductController {
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     private final ProductService productService;
+
+    private final DiscountService discountService;
 
     /**
      * Retrieves a product by its unique identifier.
@@ -68,6 +72,14 @@ public class ProductController {
         List<ProductDTO> productDTO = productService.getProductsByCategoryName(
                 categoryName, brandName, minPrice, maxPrice, rating, isAvailable, attributes,page, pageSize, pageSortedBy, sortDirection);
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("product", productDTO));
+    }
+
+    @GetMapping(value = "/discountCode/{code}")
+    public ResponseEntity<Map<String, Object>> getProductsByDiscount(@PathVariable(value = "code") @NotBlank String discountCode) {
+        DiscountDTO discount = discountService.getDiscountByCode(discountCode);
+        List<ProductDTO> productDTO = productService.getProductByDiscountCode(discountCode);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("product", productDTO, "discount", discount));
     }
 
     @PostMapping(value = "/new")

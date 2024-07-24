@@ -2,13 +2,11 @@ package org.example.mediashop.Controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.example.mediashop.Data.Entity.Category;
-import org.example.mediashop.Data.Entity.Product;
-import org.example.mediashop.Data.Entity.ProductCategory;
-import org.example.mediashop.Data.Entity.ProductCategoryKey;
+import org.example.mediashop.Data.Entity.*;
 import org.example.mediashop.Repository.CategoryRepository;
 import org.example.mediashop.Repository.ProductCategoryRepository;
 import org.example.mediashop.Repository.ProductRepository;
+import org.example.mediashop.Repository.UserRepository;
 import org.example.mediashop.TestConfig.IntegrationTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,10 +14,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
@@ -39,6 +41,12 @@ public class FilteringProductTest extends IntegrationTest {
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeAll
     static void beforeAll() {
         postgres.start();
@@ -53,10 +61,14 @@ public class FilteringProductTest extends IntegrationTest {
     List<Product> productList;
     List<ProductCategory> productCategories;
 
+    User user;
+    String token;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         RestAssured.baseURI = "http://localhost:" + port;
         productCategoryRepository.truncateAllData();
+        userRepository.deleteAll();
 
         categoryList = new ArrayList<>();
         categoryList.add(new Category(null, "CategoryTitle", "CategoryDescription", "MetaTitle", "MetaDescription", "new, category", "new-category-1", null, null, null));
@@ -81,6 +93,17 @@ public class FilteringProductTest extends IntegrationTest {
         productCategories.add(new ProductCategory(new ProductCategoryKey(productList.get(4).getId(), categoryList.get(1).getId()), productList.get(4), categoryList.get(1)));
 
         productCategoryRepository.saveAll(productCategories);
+
+        user = userRepository.save(new User("userTest", passwordEncoder.encode("passwordTest"), "email@test.com", "ROLE_USER"));
+        userRepository.save(new User("adminTest", passwordEncoder.encode("passwordTest"), "email.admin@test.com", "ROLE_ADMIN"));
+
+        token = given()
+                .contentType(ContentType.JSON)
+                .when()
+                .body(new ObjectMapper().writeValueAsString(Map.of("username", "userTest", "password", "passwordTest")))
+                .post("/api/v1/auth/login")
+                .then()
+                .extract().path("token");
     }
 
     @Test
@@ -89,6 +112,7 @@ public class FilteringProductTest extends IntegrationTest {
         List<Product> products = productList.subList(0, 2);
 
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 //.pathParams("")
@@ -155,6 +179,7 @@ public class FilteringProductTest extends IntegrationTest {
                 .toList();
 
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/category/{categoryTitle}?page={page}&size={size}&sortedBy={sortedBy}&sortDirection={sortDirection}",
@@ -218,6 +243,7 @@ public class FilteringProductTest extends IntegrationTest {
         String categoryTitle = "CategoryTitle3";
 
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/category/{0}", categoryTitle)
@@ -230,6 +256,7 @@ public class FilteringProductTest extends IntegrationTest {
     @Test
     void getProductsByCategoryNameFilter_shouldReturn400_whenCategoryIsInvalid() {
         given()
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .when()
                 .get("/api/v1/products/category/{0}", " ")
