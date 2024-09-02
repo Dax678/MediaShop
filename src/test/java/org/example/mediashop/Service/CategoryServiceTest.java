@@ -1,6 +1,7 @@
 package org.example.mediashop.Service;
 
 import org.example.mediashop.Configuration.Exception.NotFoundException;
+import org.example.mediashop.Data.DTO.CategoryDTO;
 import org.example.mediashop.Data.Entity.Category;
 import org.example.mediashop.Repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +55,7 @@ class CategoryServiceTest {
         when(categoryRepository.findAll()).thenReturn(expectedCategory);
 
         // When
-        List<Category> categories = categoryService.getAllCategories();
+        List<CategoryDTO> categories = categoryService.getAllCategories();
 
         // Then
         assert (categories != null && !categories.isEmpty());
@@ -78,14 +79,14 @@ class CategoryServiceTest {
     @Test
     public void testGetCategoryById_WhenCategoryExists_ShouldReturnCategory() {
         // Given
-        when(categoryRepository.findCategoryById(anyLong())).thenReturn(Optional.ofNullable(expectedCategory.get(0)));
+        when(categoryRepository.findCategoryById(anyLong())).thenReturn(Optional.ofNullable(expectedCategory.getFirst()));
 
         // When
-        Category result = categoryService.getCategoryById(CATEGORY_ID);
+        CategoryDTO result = categoryService.getCategoryById(CATEGORY_ID);
 
         // Then
         assertNotNull(result);
-        assertEquals(expectedCategory.get(0), result);
+        assertEquals(expectedCategory.getFirst(), result);
     }
 
     @Test
@@ -103,14 +104,14 @@ class CategoryServiceTest {
     @Test
     public void testGetCategoryByTitle_WhenCategoryExists_ShouldReturnCategory() {
         // Given
-        when(categoryRepository.findCategoryByTitle(anyString())).thenReturn(Optional.ofNullable(expectedCategory.get(0)));
+        when(categoryRepository.findCategoryByTitle(anyString())).thenReturn(Optional.ofNullable(expectedCategory.getFirst()));
 
         // When
-        Category result = categoryService.getCategoryByTitle(CATEGORY_TITLE);
+        CategoryDTO result = categoryService.getCategoryByTitle(CATEGORY_TITLE);
 
         // Then
         assertNotNull(result);
-        assertEquals(expectedCategory.get(0), result);
+        assertEquals(expectedCategory.getFirst(), result);
     }
 
     @Test

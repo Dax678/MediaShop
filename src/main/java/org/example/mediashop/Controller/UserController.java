@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
     private final UserService authenticationService;
-
-    private final AuthenticationManager authenticationManager;
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@Valid @RequestBody RegisterUserDTO registerUserDto) {

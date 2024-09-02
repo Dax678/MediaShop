@@ -10,6 +10,7 @@ import org.example.mediashop.Repository.ProductRepository;
 import org.example.mediashop.Repository.ProductSpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    @Cacheable(cacheNames = "ProductById", key = "#id")
     public ProductDTO getProductById(final Long id) {
         Optional<Product> product = productRepository.findProductById(id);
 
@@ -42,6 +44,7 @@ public class ProductService {
         return ProductMapper.toProductDTO(product.get());
     }
 
+    @Cacheable(cacheNames = "ProductByName", key = "#name")
     public ProductDTO getProductByName(final String name) {
         Optional<Product> product = productRepository.findProductByName(name);
 
@@ -97,5 +100,18 @@ public class ProductService {
     public ProductDTO addProduct(final ProductDTO productDTO) {
         Product product = ProductMapper.toProductEntity(productDTO);
         return ProductMapper.toProductDTO(productRepository.save(product));
+    }
+
+    public List<ProductDTO> getProductByDiscountCode(String discountCode) {
+        List<Product> productList = productRepository.findProductByDiscountCode(discountCode);
+
+        if (productList.isEmpty()) {
+            logger.warn("Product with discount code: {} not found", discountCode);
+            throw new NotFoundException("Product with discount code: {0} not found", discountCode);
+        }
+
+        return productList.stream()
+                .map(ProductMapper::toProductDTO)
+                .collect(Collectors.toList());
     }
 }
